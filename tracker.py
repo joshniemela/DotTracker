@@ -72,7 +72,7 @@ def process_frame(img):
 logger = logging.getLogger("Logger")
 PROGRAM_PATH = os.getcwd()
 
-file_name = f"{PROGRAM_PATH}/experiment.mp4"  # Filename
+filename = f"{PROGRAM_PATH}/experiment.mp4"  # Filename
 compare = np.uint8([[110, 165, 145]])  # RGB color to compare
 kernel = np.ones((5, 5), 'uint8')  # params for dilation
 dilate_its = 15  # Iterations for dilate function
@@ -89,7 +89,7 @@ m2 = 0.300
 
 reference = cv2.cvtColor(compare, cv2.COLOR_RGB2LAB)[0][0] # Convert RGB compare to L*a*b*
 if __name__ == "__main__":
-    cap = cv2.VideoCapture(file_name)
+    cap = cv2.VideoCapture(filename)
     frames = []
     ret = True
     while ret:
@@ -136,4 +136,4 @@ if __name__ == "__main__":
     ax[2].set_ylabel("p[kg*m/s]")
     ax[3].set_ylabel("E[J]")
     ax[3].set_xlabel("t[s]")
-    plt.savefig(f"{file_name.split(".")[0]}.png")
+    plt.savefig(f"{filename.split('.')[0]}.png")
