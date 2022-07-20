@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Created By  :  Josh Niemelä
 # Created Date:  04/05/2022
-# version = "1.0.0"
+# version = "1.1.0"
 # ---------------------------------------------------------------------------
 """ Program to get energy, momentum, position and velocity of 2 red dots """
 # ---------------------------------------------------------------------------
@@ -73,7 +73,7 @@ logger = logging.getLogger("Logger")
 programpath = os.getcwd()
 
 file_name = f"{programpath}/experiment.mp4"  # file name
-reference = [110, 165, 145]  # L*a*b* color to find
+compare = np.uint8([[110, 165, 145]])  # RGB color to compare
 kernel = np.ones((5, 5), 'uint8')  # params for dilation
 its = 15  # Iterations for dilate function
 thresh_val = 8  # Threshold value. Lower values will decrease the sensitivity.
@@ -82,11 +82,12 @@ fps = 50  # Frames per second [Hz]
 ppm = 663  # Pixels per meter [m], derived by the total length of the ruler in the video
 tstart = 0  # Start time in seconds
 tend = 3 # End time in seconds
-processes = 12  # Number of processes to be made by multiprocessing
+processes = None  # Number of processes to be made by multiprocessing, set either to None or to the number of processes.
 # Masses [kg]
 m1 = 0.300
 m2 = 0.300
 
+reference = cv2.cvtColor(compare, cv2.COLOR_RGB2LAB)[0][0] # Convert RGB compare to L*a*b*
 if __name__ == "__main__":
     cap = cv2.VideoCapture(file_name)
     frames = []
@@ -105,36 +106,34 @@ if __name__ == "__main__":
     df = df.interpolate(method="linear")  # remove to get true data
     df = df[tstart:tend]
 
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True)
-    ax1.plot(df.index, df[1], label="x1")
-    ax1.plot(df.index, df[3], label="x2")
+    fig, ax = plt.subplots(4, sharex=True)
+    ax[0].plot(df.index, df[1], label="x1")
+    ax[0].plot(df.index, df[3], label="x2")
 
     # Calculate momenta
     df = df.diff()
     df = df.rolling(3).mean() # A rolling mean is used to remove noise in the data.
-    ax2.plot(df.index, df[1], label="v1")
-    ax2.plot(df.index, df[3], label="v2")
+    ax[1].plot(df.index, df[1], label="v1")
+    ax[1].plot(df.index, df[3], label="v2")
 
     p1 = m1*df[1]
     p2 = m2*df[3]
-    ax3.plot(df.index, p1, label="p1")
-    ax3.plot(df.index, p2, label="p2")
-    ax3.plot(df.index, abs(p1+p2), label="psum")
+    ax[2].plot(df.index, p1, label="p1")
+    ax[2].plot(df.index, p2, label="p2")
+    ax[2].plot(df.index, abs(p1+p2), label="psum")
 
     e1 = 1/2*m1*df[1]**2
     e2 = 1/2*m2*df[3]**2
 
-    ax4.plot(df.index, e1, label="e1")
-    ax4.plot(df.index, e2, label="e2")
-    ax4.plot(df.index, e1+e2, label="esum")
+    ax[3].plot(df.index, e1, label="e1")
+    ax[3].plot(df.index, e2, label="e2")
+    ax[3].plot(df.index, e1+e2, label="esum")
 
-    ax1.legend()
-    ax2.legend()
-    ax3.legend()
-    ax4.legend()
-    ax1.set_ylabel("x[m]")
-    ax2.set_ylabel("v[m/s]")
-    ax3.set_ylabel("p[kg*m/s]")
-    ax4.set_ylabel("E[J]")
-    ax4.set_xlabel("t[s]")
-    plt.savefig(f"{file_name}.png")
+    for axis in ax:
+        axis.legend()
+    ax[0].set_ylabel("x[m]")
+    ax[1].set_ylabel("v[m/s]")
+    ax[2].set_ylabel("p[kg*m/s]")
+    ax[3].set_ylabel("E[J]")
+    ax[3].set_xlabel("t[s]")
+    plt.savefig(f"{file_name.split(".")[0]}.png")

@@ -3,7 +3,7 @@
 # Created Date:  04/05/2022
 # version = "1.0.0"
 # ---------------------------------------------------------------------------
-""" Program to make a position scatter plot of 2 red dots """
+""" Program to make a position scatter plot of 2 red dots OUT OF DATE"""
 # ---------------------------------------------------------------------------
 import numpy as np
 import cv2
