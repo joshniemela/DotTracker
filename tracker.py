@@ -45,12 +45,12 @@ def color_diff(frame, reference, threshold, dilate_size, dilate_iterations):
     LAB = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
     diffed = compareAB(LAB, reference)
     thresh = cv2.threshold(diffed, thresh_val, 255, cv2.THRESH_BINARY_INV)[1]
-    dilated = cv2.dilate(thresh, kernel=kernel, iterations=its)
+    dilated = cv2.dilate(thresh, kernel=kernel, iterations=dilate_its)
     return(dilated)
 
 
 def process_frame(img):
-    thresh = color_diff(img, reference, thresh_val, kernel, its)
+    thresh = color_diff(img, reference, thresh_val, kernel, dilate_its)
 
     contours, hierarchy = cv2.findContours(
         thresh,
@@ -67,21 +67,21 @@ def process_frame(img):
             return(np.array([y1, x1, y2, x2]))
     else:
         print(f"found {hierarchy.shape[1]} obs")
-        return(np.zeros(4)*np.nan)  # Return nan values
+        return(np.zeros(4)*np.nan)  # Return nan values if there is a wrong number of objects.
 
 logger = logging.getLogger("Logger")
-programpath = os.getcwd()
+PROGRAM_PATH = os.getcwd()
 
-file_name = f"{programpath}/experiment.mp4"  # file name
+file_name = f"{PROGRAM_PATH}/experiment.mp4"  # Filename
 compare = np.uint8([[110, 165, 145]])  # RGB color to compare
 kernel = np.ones((5, 5), 'uint8')  # params for dilation
-its = 15  # Iterations for dilate function
+dilate_its = 15  # Iterations for dilate function
 thresh_val = 8  # Threshold value. Lower values will decrease the sensitivity.
 ob_num = 2  # Expected objects
 fps = 50  # Frames per second [Hz]
 ppm = 663  # Pixels per meter [m], derived by the total length of the ruler in the video
-tstart = 0  # Start time in seconds
-tend = 3 # End time in seconds
+t_start = 0  # Start time in seconds
+t_end = 3 # End time in seconds
 processes = None  # Number of processes to be made by multiprocessing, set either to None or to the number of processes.
 # Masses [kg]
 m1 = 0.300
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     df.index = df.index/fps
     df = df/ppm  # Calculates SI unit for displacement
     df = df.interpolate(method="linear")  # remove to get true data
-    df = df[tstart:tend]
+    df = df[t_start:t_end]
 
     fig, ax = plt.subplots(4, sharex=True)
     ax[0].plot(df.index, df[1], label="x1")

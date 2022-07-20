@@ -1,4 +1,6 @@
-import cv2
+"""
+Small helper script to filter out HSV
+"""import cv2
 import sys
 import numpy as np
 
